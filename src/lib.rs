@@ -192,7 +192,7 @@ pub fn push_current_touchbar_label<T: Write>(stdout: &mut T) -> TerminalError {
 }
 
 pub fn pop_current_touchbar_label<T: Write>(stdout: &mut T) -> TerminalError {
-    stdout.write_all(b"\x1b]1337;PopKeyLabels\x07v")
+    stdout.write_all(b"\x1b]1337;PopKeyLabels\x07")
 }
 
 pub fn push_touchbar_label<T: Write>(stdout: &mut T, label: &str) -> TerminalError {
@@ -201,4 +201,8 @@ pub fn push_touchbar_label<T: Write>(stdout: &mut T, label: &str) -> TerminalErr
 
 pub fn pop_touchbar_label<T: Write>(stdout: &mut T, label: &str) -> TerminalError {
     stdout.write_all(format!("\x1b1337;PopKeyLabels={}\x07", label).as_bytes())
+}
+
+pub fn set_unicode_version<T: Write>(stdout: &mut T, version: u8) -> TerminalError {
+    stdout.write_all(format!("\x1b1337;UnicodeVersion={}\x07", version).as_bytes())
 }

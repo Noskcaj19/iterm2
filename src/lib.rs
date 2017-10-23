@@ -182,3 +182,23 @@ pub fn download_image<T: Write>(stdout: &mut T, args: &str, img_data: &[u8]) -> 
     stdout.write_all(img_data)?;
     stdout.write_all(b"\x07")
 }
+
+pub fn set_touchbar_key_label<T: Write>(stdout: &mut T, key: &str, value: &str) -> TerminalError {
+    stdout.write_all(format!("\x1b]1337;SetKeyLabel={}={}\x07", key, value).as_bytes())
+}
+
+pub fn push_current_touchbar_label<T: Write>(stdout: &mut T) -> TerminalError {
+    stdout.write_all(b"\x1b]1337;PushKeyLabels\x07")
+}
+
+pub fn pop_current_touchbar_label<T: Write>(stdout: &mut T) -> TerminalError {
+    stdout.write_all(b"\x1b]1337;PopKeyLabels\x07v")
+}
+
+pub fn push_touchbar_label<T: Write>(stdout: &mut T, label: &str) -> TerminalError {
+    stdout.write_all(format!("\x1b1337;PushKeyLabels={}\x07", label).as_bytes())
+}
+
+pub fn pop_touchbar_label<T: Write>(stdout: &mut T, label: &str) -> TerminalError {
+    stdout.write_all(format!("\x1b1337;PopKeyLabels={}\x07", label).as_bytes())
+}

@@ -19,7 +19,7 @@ pub enum AttentionType {
 }
 
 pub fn anchor<T: Write>(stdout: &mut T, url: &str, display_text: &str) -> TerminalError {
-    stdout.write_all(format!("\x1b]8;;{}\x07{}\x1b]8;;\x07\n", url, display_text).as_bytes())
+    stdout.write_all(format!("\x1b]8;;{}\x07{}\x1b]8;;\x07", url, display_text).as_bytes())
 }
 
 pub fn set_cursor_shape<T: Write>(stdout: &mut T, shape: &CursorShape) -> TerminalError {

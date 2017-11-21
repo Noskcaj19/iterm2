@@ -1,9 +1,7 @@
 extern crate base64;
 
 use std::io::Write;
-
 use std::io::stdout;
-
 use base64::encode;
 
 pub type TerminalError = std::result::Result<(), std::io::Error>;

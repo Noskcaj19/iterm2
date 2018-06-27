@@ -2,6 +2,15 @@
 authors = ["Noskcaj <kcajdev@gmail.com>"]
 name = "iterm2"
 version = "0.1.0"
+description = "A library for using iTerm2 escpae codes"
+repository = "https://github.com/Noskcaj19/iterm2"
+homepage = "https://github.com/Noskcaj19/iterm2"
+readme = "README.md"
+license = "MIT"
+
+keywords = [
+    "terminal",
+]
 
 [dependencies]
 base64 = "0.7.0"

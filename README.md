@@ -10,5 +10,5 @@ use iterm2::*;
 
 clear_scrollback().unwrap();
 anchor("https://google.com", "google").unwrap();
-attention(&AttentionType::Firework).unwrap();
+attention(AttentionType::Firework).unwrap();
 ```

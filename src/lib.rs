@@ -230,12 +230,16 @@ pub fn get_terminal_variable(filename: &str) -> Result<String, std::io::Error> {
     unimplemented!()
 }
 
-/// Download a file. Accepts raw file contents, all arguments must be valid key=value pairs
-/// and be separated with semicolons
+/// Download a file. Accepts raw file contents and option arguments
 ///
 /// See the [iTerm2 docs](https://www.iterm2.com/documentation-images.html) for more information
-pub fn download_image(args: &str, img_data: &[u8]) -> TerminalError {
-    stdout().write_all(format!("\x1b]1337;File={}:", args).as_bytes())?;
+pub fn download_file(args: &[(&str, &str)], img_data: &[u8]) -> TerminalError {
+    let joined_args = args
+        .iter()
+        .map(|item| format!("{}={}", item.0, item.1))
+        .collect::<Vec<_>>()
+        .join(";");
+    stdout().write_all(format!("\x1b]1337;File={}:", joined_args).as_bytes())?;
 
     let encoded_data = base64::encode(img_data);
     stdout().write_all(&encoded_data.as_bytes())?;

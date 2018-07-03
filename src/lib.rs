@@ -230,12 +230,15 @@ pub fn get_terminal_variable(filename: &str) -> Result<String, std::io::Error> {
     unimplemented!()
 }
 
-/// Show an image inline. Accepts raw image data base64 encoded
+/// Download a file. Accepts raw file contents, all arguments must be valid key=value pairs
+/// and be separated with semicolons
 ///
 /// See the [iTerm2 docs](https://www.iterm2.com/documentation-images.html) for more information
 pub fn download_image(args: &str, img_data: &[u8]) -> TerminalError {
     stdout().write_all(format!("\x1b]1337;File={}:", args).as_bytes())?;
-    stdout().write_all(img_data)?;
+
+    let encoded_data = base64::encode(img_data);
+    stdout().write_all(&encoded_data.as_bytes())?;
     stdout().write_all(b"\x07")
 }
 

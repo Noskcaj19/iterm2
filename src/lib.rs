@@ -4,14 +4,24 @@
 //!
 //! # Usage
 //!
-//! ```rust
-//! use iterm2::*;
+//! ```rust,no_run
+//! use iterm2::{AttentionType, Dimension, File};
 //!
-//! clear_scrollback().unwrap();
-//! anchor("https://google.com", "google").unwrap();
-//! attention(AttentionType::Firework).unwrap();
+//! iterm2::clear_scrollback()?;
+//! iterm2::anchor("https://google.com", "google")?;
+//! iterm2::attention(AttentionType::Firework)?;
+//!
+//! File::read("path/to/some/image.png")?
+//!     .height(Dimension::Cells(14))
+//!     .width(Dimension::Percent(100))
+//!     .preserve_aspect_ratio(false)
+//!     .show()?;
+//!
+//! # Ok::<_, std::io::Error>(())
 //! ```
-//!
+
+mod file;
+pub use file::*;
 
 use base64::encode;
 use std::io::{self, stdout, Write};
@@ -222,22 +232,6 @@ pub fn get_cell_size(filename: &str) -> io::Result<(f32, f32)> {
 #[allow(unused_variables)]
 pub fn get_terminal_variable(filename: &str) -> io::Result<String> {
     unimplemented!()
-}
-
-/// Download a file. Accepts raw file contents and option arguments
-///
-/// See the [iTerm2 docs](https://www.iterm2.com/documentation-images.html) for more information
-pub fn download_file(args: &[(&str, &str)], img_data: &[u8]) -> io::Result<()> {
-    let joined_args = args
-        .iter()
-        .map(|item| format!("{}={}", item.0, item.1))
-        .collect::<Vec<_>>()
-        .join(";");
-    stdout().write_all(format!("\x1b]1337;File={}:", joined_args).as_bytes())?;
-
-    let encoded_data = base64::encode(img_data);
-    stdout().write_all(&encoded_data.as_bytes())?;
-    stdout().write_all(b"\x07")
 }
 
 /// Configures touchbar key lables

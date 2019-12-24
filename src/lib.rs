@@ -4,23 +4,27 @@
 //!
 //! # Usage
 //!
-//! ```rust
-//! extern crate iterm2;
-//! use iterm2::*;
+//! ```rust,no_run
+//! use iterm2::{AttentionType, Dimension, File};
 //!
-//! clear_scrollback().unwrap();
-//! anchor("https://google.com", "google").unwrap();
-//! attention(AttentionType::Firework).unwrap();
+//! iterm2::clear_scrollback()?;
+//! iterm2::anchor("https://google.com", "google")?;
+//! iterm2::attention(AttentionType::Firework)?;
+//!
+//! File::read("path/to/some/image.png")?
+//!     .height(Dimension::Cells(14))
+//!     .width(Dimension::Percent(100))
+//!     .preserve_aspect_ratio(false)
+//!     .show()?;
+//!
+//! # Ok::<_, std::io::Error>(())
 //! ```
-//!
 
-extern crate base64;
+mod file;
+pub use file::*;
 
 use base64::encode;
-use std::io::stdout;
-use std::io::Write;
-
-pub type TerminalError = Result<(), std::io::Error>;
+use std::io::{self, stdout, Write};
 
 /// The possible cusor shpaes
 #[derive(Debug, Clone, Copy)]
@@ -45,13 +49,13 @@ pub enum AttentionType {
 }
 
 /// Display a clickable link with custom display text
-pub fn anchor(url: &str, display_text: &str) -> TerminalError {
+pub fn anchor(url: &str, display_text: &str) -> io::Result<()> {
     stdout().write_all(format!("\x1b]8;;{}\x07{}\x1b]8;;\x07", url, display_text).as_bytes())
 }
 
 /// Set the shape of the cursor
-pub fn set_cursor_shape(shape: CursorShape) -> TerminalError {
-    use CursorShape::*;
+pub fn set_cursor_shape(shape: CursorShape) -> io::Result<()> {
+    use crate::CursorShape::*;
     let shape_val = match shape {
         Block => 0,
         VerticalBar => 1,
@@ -61,47 +65,47 @@ pub fn set_cursor_shape(shape: CursorShape) -> TerminalError {
 }
 
 /// Set a mark at the current line
-pub fn set_mark() -> TerminalError {
+pub fn set_mark() -> io::Result<()> {
     stdout().write_all(b"\x1b]1337;SetMark\x07")
 }
 
 /// Attempt to make iTerm the focused application
-pub fn steal_focus() -> TerminalError {
+pub fn steal_focus() -> io::Result<()> {
     stdout().write_all(b"\x1b]1337;StealFocus\x07")
 }
 
 /// Clear the terminals scroll history
-pub fn clear_scrollback() -> TerminalError {
+pub fn clear_scrollback() -> io::Result<()> {
     stdout().write_all(b"\x1b]1337;ClearScrollback\x07")
 }
 
 /// Sets the terminals current working directory
-pub fn set_current_dir(dir: &str) -> TerminalError {
+pub fn set_current_dir(dir: &str) -> io::Result<()> {
     stdout().write_all(format!("\x1b]1337;CurrentDir={}\x07", dir).as_bytes())
 }
 
 /// Send a system wide Growl notification
-pub fn send_notification(message: &str) -> TerminalError {
+pub fn send_notification(message: &str) -> io::Result<()> {
     stdout().write_all(format!("\x1b]9;{}\x07", message).as_bytes())
 }
 
 /// Sets the clipboard
 // TODO: Add support for the other clipboards
-pub fn set_clipboard(text: &str) -> TerminalError {
+pub fn set_clipboard(text: &str) -> io::Result<()> {
     stdout().write_all(b"\x1b]1337;CopyToClipboard=\x07")?;
     stdout().write_all(text.as_bytes())?;
     stdout().write_all(b"\n\x1b]1337;EndCopy\x07")
 }
 
 /// Sets the tab colors to a custom rgb value
-pub fn set_tab_colors(red: u8, green: u8, blue: u8) -> TerminalError {
+pub fn set_tab_colors(red: u8, green: u8, blue: u8) -> io::Result<()> {
     stdout().write_all(format!("\x1b]6;1;bg;red;brightness;{}\x07", red).as_bytes())?;
     stdout().write_all(format!("\x1b]6;1;bg;green;brightness;{}\x07", green).as_bytes())?;
     stdout().write_all(format!("\x1b]6;1;bg;blue;brightness;{}\x07", blue).as_bytes())
 }
 
 /// Restore the tab colors to defaults
-pub fn restore_tab_colors() -> TerminalError {
+pub fn restore_tab_colors() -> io::Result<()> {
     stdout().write_all(b"\x1b]6;1;bg;*;default\x07")
 }
 
@@ -109,7 +113,7 @@ pub fn restore_tab_colors() -> TerminalError {
 ///
 /// For details on the format, see "Change the color palette" at https://www.iterm2.com/documentation-escape-codes.html
 // TODO: Add better parameters
-pub fn set_color_palette(colors: &str) -> TerminalError {
+pub fn set_color_palette(colors: &str) -> io::Result<()> {
     stdout().write_all(format!("\x1b]1337;SetColors={}\x07", colors).as_bytes())
 }
 
@@ -154,7 +158,7 @@ impl Annotation {
     }
 
     /// Display the annotation
-    pub fn show(&self) -> TerminalError {
+    pub fn show(&self) -> io::Result<()> {
         let value = match self {
             Annotation {
                 message: msg,
@@ -189,14 +193,14 @@ impl Annotation {
 }
 
 /// Set the visibility of the cursor guide
-pub fn cursor_guide(show: bool) -> TerminalError {
+pub fn cursor_guide(show: bool) -> io::Result<()> {
     let value = if show { "yes" } else { "no" };
     stdout().write_all(format!("\x1b]1337;HighlightCursorLine={}\x07", value).as_bytes())
 }
 
 /// Trigger a dock bounce notification or fireworks
-pub fn attention(kind: AttentionType) -> TerminalError {
-    use AttentionType::*;
+pub fn attention(kind: AttentionType) -> io::Result<()> {
+    use crate::AttentionType::*;
     let value = match kind {
         Yes => "yes",
         No => "no",
@@ -206,7 +210,7 @@ pub fn attention(kind: AttentionType) -> TerminalError {
 }
 
 /// Set the terminal background to the image at a path
-pub fn set_background_image(filename: &str) -> TerminalError {
+pub fn set_background_image(filename: &str) -> io::Result<()> {
     let base64_filename = encode(filename.as_bytes());
     stdout()
         .write_all(format!("\x1b]1337;SetBackgroundImageFile={}\x07", base64_filename).as_bytes())
@@ -217,7 +221,7 @@ pub fn set_background_image(filename: &str) -> TerminalError {
 /// *Not yet implemented*
 //TODO: Implement
 #[allow(unused_variables)]
-pub fn get_cell_size(filename: &str) -> Result<(f32, f32), std::io::Error> {
+pub fn get_cell_size(filename: &str) -> io::Result<(f32, f32)> {
     unimplemented!()
 }
 
@@ -226,54 +230,38 @@ pub fn get_cell_size(filename: &str) -> Result<(f32, f32), std::io::Error> {
 /// *Not yet implemented*
 //TODO: Implement
 #[allow(unused_variables)]
-pub fn get_terminal_variable(filename: &str) -> Result<String, std::io::Error> {
+pub fn get_terminal_variable(filename: &str) -> io::Result<String> {
     unimplemented!()
-}
-
-/// Download a file. Accepts raw file contents and option arguments
-///
-/// See the [iTerm2 docs](https://www.iterm2.com/documentation-images.html) for more information
-pub fn download_file(args: &[(&str, &str)], img_data: &[u8]) -> TerminalError {
-    let joined_args = args
-        .iter()
-        .map(|item| format!("{}={}", item.0, item.1))
-        .collect::<Vec<_>>()
-        .join(";");
-    stdout().write_all(format!("\x1b]1337;File={}:", joined_args).as_bytes())?;
-
-    let encoded_data = base64::encode(img_data);
-    stdout().write_all(&encoded_data.as_bytes())?;
-    stdout().write_all(b"\x07")
 }
 
 /// Configures touchbar key lables
 ///
 /// Seethe [iTerm2 docs](https://www.iterm2.com/documentation-escape-codes.html) for more information
-pub fn set_touchbar_key_label(key: &str, value: &str) -> TerminalError {
+pub fn set_touchbar_key_label(key: &str, value: &str) -> io::Result<()> {
     stdout().write_all(format!("\x1b]1337;SetKeyLabel={}={}\x07", key, value).as_bytes())
 }
 
 /// Push the current key labels
-pub fn push_current_touchbar_labels() -> TerminalError {
+pub fn push_current_touchbar_labels() -> io::Result<()> {
     stdout().write_all(b"\x1b]1337;PushKeyLabels\x07")
 }
 
 /// Pop the current key labels
-pub fn pop_current_touchbar_labels() -> TerminalError {
+pub fn pop_current_touchbar_labels() -> io::Result<()> {
     stdout().write_all(b"\x1b]1337;PopKeyLabels\x07")
 }
 
 /// Push a specific touchbar key label by name
-pub fn push_touchbar_label(label: &str) -> TerminalError {
+pub fn push_touchbar_label(label: &str) -> io::Result<()> {
     stdout().write_all(format!("\x1b1337;PushKeyLabels={}\x07", label).as_bytes())
 }
 
 /// Pop a specific touchbar key label by name
-pub fn pop_touchbar_label(label: &str) -> TerminalError {
+pub fn pop_touchbar_label(label: &str) -> io::Result<()> {
     stdout().write_all(format!("\x1b1337;PopKeyLabels={}\x07", label).as_bytes())
 }
 
 /// Sets the terminals unicode version
-pub fn set_unicode_version(version: u8) -> TerminalError {
+pub fn set_unicode_version(version: u8) -> io::Result<()> {
     stdout().write_all(format!("\x1b1337;UnicodeVersion={}\x07", version).as_bytes())
 }

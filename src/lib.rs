@@ -5,7 +5,6 @@
 //! # Usage
 //!
 //! ```rust
-//! extern crate iterm2;
 //! use iterm2::*;
 //!
 //! clear_scrollback().unwrap();
@@ -14,11 +13,8 @@
 //! ```
 //!
 
-extern crate base64;
-
 use base64::encode;
-use std::io::stdout;
-use std::io::Write;
+use std::io::{stdout, Write};
 
 pub type TerminalError = Result<(), std::io::Error>;
 
@@ -51,7 +47,7 @@ pub fn anchor(url: &str, display_text: &str) -> TerminalError {
 
 /// Set the shape of the cursor
 pub fn set_cursor_shape(shape: CursorShape) -> TerminalError {
-    use CursorShape::*;
+    use crate::CursorShape::*;
     let shape_val = match shape {
         Block => 0,
         VerticalBar => 1,
@@ -196,7 +192,7 @@ pub fn cursor_guide(show: bool) -> TerminalError {
 
 /// Trigger a dock bounce notification or fireworks
 pub fn attention(kind: AttentionType) -> TerminalError {
-    use AttentionType::*;
+    use crate::AttentionType::*;
     let value = match kind {
         Yes => "yes",
         No => "no",

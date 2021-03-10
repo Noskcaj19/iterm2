@@ -14,4 +14,4 @@ keywords = [
 ]
 
 [dependencies]
-base64 = "0.10.1"
+base64 = "0.13.0"
